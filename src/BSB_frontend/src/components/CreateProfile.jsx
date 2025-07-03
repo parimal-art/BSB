@@ -30,17 +30,19 @@ const CreateProfile = () => {
           
           const agent = new HttpAgent({ identity, host });
           
+          // Only fetch the root key in development
           if (process.env.DFX_NETWORK !== 'ic') {
             await agent.fetchRootKey();
           }
           
-          const actorInstance = Actor.createActor(idlFactory, {
+          const actor = Actor.createActor(idlFactory, {
             agent,
             canisterId,
           });
           
-          setActor(actorInstance);
+          setActor(actor);
         } else {
+          // If not authenticated, redirect to login
           navigate('/');
         }
       } catch (error) {
@@ -59,6 +61,7 @@ const CreateProfile = () => {
       [name]: value,
     }));
     
+    // Clear error when user types
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -84,30 +87,27 @@ const CreateProfile = () => {
 
   const handleImageChange = (e, fieldName) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({
-          ...prev,
-          [fieldName]: reader.result,
-        }));
-      };
-      reader.onerror = () => console.error(`Error reading ${fieldName} file`);
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    // For a real app, you would upload to a storage solution
+    // Here we're using a mock URL as placeholder
+    const mockImageUrl = `https://picsum.photos/id/${Math.floor(Math.random() * 1000)}/400/400`;
+    
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: mockImageUrl,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm() || !actor) {
-      setErrors({ submit: 'Please ensure all fields are valid and authenticated.' });
-      return;
-    }
+    if (!validateForm() || !actor) return;
     
     setIsLoading(true);
     
     try {
+      // Convert to Option type format for Candid
       const profileImageOpt = formData.profileImage ? [formData.profileImage] : [];
       const coverPhotoOpt = formData.coverPhoto ? [formData.coverPhoto] : [];
       
@@ -127,192 +127,137 @@ const CreateProfile = () => {
     }
   };
 
-  if (!actor) {
-    return <div style={{ textAlign: 'center', padding: '20px', color: '#606770' }}>Loading...</div>;
-  }
-
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#f0f2f5',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '20px',
-    }}>
-      <div style={{
-        backgroundColor: '#fff',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-        width: '100%',
-        maxWidth: '600px',
-        padding: '20px',
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1a1a1a' }}>Create Your Profile</h2>
-          <p style={{ fontSize: '14px', color: '#606770' }}>
-            Set up your profile to get started with our social network
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">Create Your Profile</h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Set up your profile to get started with our decentralized social network
           </p>
         </div>
-        <div style={{
-          width: '100%',
-          backgroundColor: '#fff',
-          borderBottom: '1px solid #ddd',
-          paddingBottom: '10px',
-          marginBottom: '20px',
-        }}>
-          <div style={{
-            height: '200px',
-            backgroundColor: '#e9ecef',
-            position: 'relative',
-            backgroundImage: formData.coverPhoto ? `url(${formData.coverPhoto})` : 'none',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}>
-            <input
-              type="file"
-              accept="image/*"
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Cover Photo Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Cover Photo
+            </label>
+            <div 
+              className="relative h-32 rounded-lg border-dashed border-2 border-gray-300 flex justify-center items-center bg-gray-100 hover:bg-gray-200 transition"
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                opacity: 0,
-                cursor: 'pointer',
+                backgroundImage: formData.coverPhoto ? `url(${formData.coverPhoto})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
               }}
-              onChange={(e) => handleImageChange(e, 'coverPhoto')}
-            />
-            {!formData.coverPhoto && (
-              <div style={{ textAlign: 'center', paddingTop: '80px', color: '#606770' }}>
-                Add Cover Photo
-              </div>
-            )}
-          </div>
-          <div style={{
-            position: 'relative',
-            marginTop: '-50px',
-            padding: '0 15px',
-            display: 'flex',
-            alignItems: 'center',
-          }}>
-            <div style={{
-              width: '150px',
-              height: '150px',
-              borderRadius: '50%',
-              backgroundColor: '#e9ecef',
-              border: '5px solid #fff',
-              overflow: 'hidden',
-              backgroundImage: formData.profileImage ? `url(${formData.profileImage})` : 'none',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}>
+            >
               <input
                 type="file"
                 accept="image/*"
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  opacity: 0,
-                  cursor: 'pointer',
-                }}
-                onChange={(e) => handleImageChange(e, 'profileImage')}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                onChange={(e) => handleImageChange(e, 'coverPhoto')}
               />
-              {!formData.profileImage && (
-                <div style={{ textAlign: 'center', paddingTop: '60px', color: '#606770' }}>
-                  Add Photo
+              {!formData.coverPhoto && (
+                <div className="text-center">
+                  <span className="block text-sm text-gray-600">
+                    Click to upload cover photo
+                  </span>
                 </div>
               )}
             </div>
-            <div style={{ marginLeft: '20px', flexGrow: 1 }}>
+          </div>
+
+          {/* Profile Picture Upload */}
+          <div className="flex justify-center -mt-10 relative z-10">
+            <div 
+              className="h-24 w-24 rounded-full border-4 border-white bg-gray-200 flex items-center justify-center overflow-hidden"
+              style={{
+                backgroundImage: formData.profileImage ? `url(${formData.profileImage})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            >
               <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Full Name"
-                style={{
-                  width: '100%',
-                  padding: '10px',
-                  fontSize: '24px',
-                  fontWeight: 'bold',
-                  border: 'none',
-                  outline: 'none',
-                  color: '#1c1e21',
-                }}
-                required
-                aria-invalid={errors.name ? "true" : "false"}
-                aria-describedby={errors.name ? "name-error" : null}
+                type="file"
+                accept="image/*"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                onChange={(e) => handleImageChange(e, 'profileImage')}
               />
-              {errors.name && (
-                <p id="name-error" style={{ marginTop: '5px', fontSize: '12px', color: '#fa383e' }}>{errors.name}</p>
+              {!formData.profileImage && (
+                <span className="text-gray-500 text-xs">Add Profile Photo</span>
               )}
             </div>
           </div>
-        </div>
-        <div>
-          <textarea
-            name="bio"
-            value={formData.bio}
-            onChange={handleChange}
-            placeholder="Tell us about yourself..."
-            style={{
-              width: '100%',
-              padding: '10px',
-              fontSize: '14px',
-              border: '1px solid #dddfe2',
-              borderRadius: '4px',
-              resize: 'vertical',
-              minHeight: '100px',
-              outline: 'none',
-            }}
-            required
-            aria-invalid={errors.bio ? "true" : "false"}
-            aria-describedby={errors.bio ? "bio-error" : null}
-          />
-          {errors.bio && (
-            <p id="bio-error" style={{ marginTop: '5px', fontSize: '12px', color: '#fa383e' }}>{errors.bio}</p>
-          )}
-        </div>
-        <button
-          type="submit"
-          disabled={isLoading || !actor}
-          onClick={handleSubmit}
-          style={{
-            backgroundColor: '#1877f2',
-            color: '#fff',
-            padding: '10px',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            transition: 'background-color 0.2s',
-            width: '100%',
-            marginTop: '20px',
-            opacity: isLoading || !actor ? '0.6' : '1',
-          }}
-          onMouseOver={(e) => !isLoading && !actor && (e.target.style.backgroundColor = '#166fe5')}
-          onMouseOut={(e) => !isLoading && !actor && (e.target.style.backgroundColor = '#1877f2')}
-        >
-          {isLoading ? (
-            <>
-              <span style={{ marginRight: '8px' }}>Creating Profile...</span>
-              <span style={{ display: 'inline-block', width: '16px', height: '16px', border: '2px solid #fff', borderTop: '2px solid #166fe5', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-            </>
-          ) : (
-            'Create Profile'
-          )}
-        </button>
-        {errors.submit && (
-          <p style={{ marginTop: '10px', fontSize: '12px', color: '#fa383e', textAlign: 'center' }}>{errors.submit}</p>
-        )}
+
+          {/* Name Input */}
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              Full Name*
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border ${
+                errors.name ? 'border-red-500' : ''
+              }`}
+              placeholder="Your full name"
+            />
+            {errors.name && (
+              <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+            )}
+          </div>
+
+          {/* Bio Input */}
+          <div>
+            <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
+              About / Bio*
+            </label>
+            <textarea
+              id="bio"
+              name="bio"
+              rows="4"
+              value={formData.bio}
+              onChange={handleChange}
+              className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border ${
+                errors.bio ? 'border-red-500' : ''
+              }`}
+              placeholder="Tell us about yourself..."
+            />
+            {errors.bio && (
+              <p className="mt-1 text-sm text-red-600">{errors.bio}</p>
+            )}
+          </div>
+
+          {/* Submit Button */}
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading || !actor}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating Profile...
+                </>
+              ) : (
+                'Create Profile'
+              )}
+            </button>
+            {errors.submit && (
+              <p className="mt-2 text-sm text-red-600 text-center">{errors.submit}</p>
+            )}
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
-export default CreateProfile;
+export default CreateProfile; 
