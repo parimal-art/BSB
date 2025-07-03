@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "src/BSB_backend"
+]
+resolver = "2"
