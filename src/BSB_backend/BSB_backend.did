@@ -1,3 +1,57 @@
+type Comment = record {
+  author : principal;
+  text : text;
+  timestamp : nat64;
+};
+
+type Post = record {
+  post_id : nat64;
+  author : principal;
+  content : text;
+  image_url : opt text;
+  likes : vec principal;
+  comments : vec Comment;
+  timestamp : nat64;
+};
+
+type Result = variant {
+  Ok : Post;
+  Err : text;
+};
+
+type Result_1 = variant {
+  Ok;
+  Err : text;
+};
+
+type Result_2 = variant {
+  Ok : UserProfile;
+  Err : text;
+};
+
+type UserProfile = record {
+  principal_id : principal;
+  name : text;
+  bio : text;
+  profile_image_url : opt text;
+  cover_photo_url : opt text;
+  followers : vec principal;
+  following : vec principal;
+};
+
 service : {
-    "greet": (text) -> (text) query;
+  comment_post : (nat64, text) -> (Result_1);
+  create_post : (text, opt text) -> (Result);
+  create_profile : (text, text, opt text, opt text) -> (Result_1);
+  follow_user : (principal) -> (Result_1);
+  get_all_posts : () -> (vec Post) query;
+  get_followers : (principal) -> (vec principal) query;
+  get_following : (principal) -> (vec principal) query;
+  get_my_profile : () -> (Result_2) query;
+  get_posts_by_user : (principal) -> (vec Post) query;
+  get_profile : (principal) -> (Result_2) query;
+  is_following : (principal, principal) -> (bool) query;
+  like_post : (nat64) -> (Result_1);
+  unfollow_user : (principal) -> (Result_1);
+  update_profile : (text, text, opt text, opt text) -> (Result_1);
 }

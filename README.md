@@ -1,3 +1,134 @@
+# Social DApp on Internet Computer
+
+A fully decentralized social media application built on the Internet Computer platform.
+
+## Features
+
+- 🔐 Secure authentication via Internet Identity
+- 👤 User profile creation and management
+- 📝 Post creation with text and images
+- 👍 Like and comment on posts
+- 👥 Follow/unfollow other users
+- 📱 Responsive UI built with Tailwind CSS
+
+## Tech Stack
+
+- **Backend**: Rust (ic-cdk canister)
+- **Frontend**: React.js
+- **Styling**: Tailwind CSS
+- **Authentication**: Internet Identity
+
+## Getting Started
+
+### Prerequisites
+
+- [DFX](https://internetcomputer.org/docs/current/developer-docs/build/install-upgrade-remove) (Internet Computer SDK)
+- Node.js (version 16 or higher)
+- npm (version 7 or higher)
+
+### Installation
+
+1. Clone this repository:
+
+```bash
+git clone https://github.com/yourusername/social-dapp.git
+cd social-dapp
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Start the local Internet Computer replica:
+
+```bash
+dfx start --background
+```
+
+4. Deploy the Internet Identity canister (if not already deployed):
+
+```bash
+dfx deploy internet_identity
+```
+
+5. Deploy the application:
+
+```bash
+./deploy.sh
+```
+
+Or manually:
+
+```bash
+dfx deploy
+```
+
+6. Open the application in your browser:
+
+```
+http://localhost:4943/?canisterId=$(dfx canister id BSB_frontend)
+```
+
+## Usage
+
+1. **Login**: Use Internet Identity to authenticate
+2. **Create Profile**: Set up your profile with name, bio, and photos
+3. **Dashboard**: View the latest posts from all users
+4. **Create Post**: Share your thoughts and upload images
+5. **Interact**: Like, comment, and follow other users
+
+## Development
+
+### Project Structure
+
+- `src/BSB_backend/`: Rust backend canister code
+- `src/BSB_frontend/`: React frontend code
+- `src/BSB_frontend/components/`: React components
+
+### Local Development
+
+1. Start the local replica:
+
+```bash
+dfx start
+```
+
+2. In a new terminal, start the development server:
+
+```bash
+npm start
+```
+
+3. Your app will be available at:
+
+```
+http://localhost:3000/
+```
+
+### Deploying to the Internet Computer Mainnet
+
+1. Get cycles from the [Cycles Faucet](https://faucet.dfinity.org/)
+
+2. Configure your dfx.json with your principal
+
+3. Deploy to the IC mainnet:
+
+```bash
+dfx deploy --network ic
+```
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- [Internet Computer](https://internetcomputer.org/)
+- [DFINITY Foundation](https://dfinity.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+
 # `BSB`
 
 Welcome to your new `BSB` project and to the Internet Computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
